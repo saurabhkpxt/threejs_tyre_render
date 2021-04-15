@@ -2,51 +2,74 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import filePath from "./model2.glb";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 class App extends Component {
   componentDidMount() {
+    // === THREE.JS CODE START ===
+
+    var mixer;
+
+    var gltfLoader = new GLTFLoader();
     var scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x808080);
+
     var camera = new THREE.PerspectiveCamera(
-      75,
+      45,
       window.innerWidth / window.innerHeight,
-      0.1,
+      1,
       1000
     );
-
-    const gltfLoader = new GLTFLoader();
-    const url =
-      "resources/models/cartoon_lowpoly_small_city_free_pack/scene.gltf";
-    gltfLoader.load(url, (gltf) => {
-      const root = gltf.scene;
-      scene.add(root);
-    });
+    camera.position.set(50, 50, 50);
 
     var renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     this.mount.appendChild(renderer.domElement);
 
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    var cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
+    hemiLight.position.set(0, 20, 0);
+    scene.add(hemiLight);
 
-    camera.position.z = 5;
+    var dirLight = new THREE.DirectionalLight(0xffffff);
+    dirLight.position.set(-3, 10, -10);
+    scene.add(dirLight);
 
-    var animate = function () {
+    gltfLoader.load(filePath, (gltf) => {
+      console.log(gltf);
+      scene.add(gltf.scene);
+
+      mixer = new THREE.AnimationMixer(gltf.scene);
+    });
+
+    const helper = new THREE.CameraHelper(camera);
+    scene.add(helper);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+
+    const clock = new THREE.Clock();
+
+    function animate() {
       requestAnimationFrame(animate);
 
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
+      var delta = clock.getDelta();
+
+      if (mixer) mixer.update(delta);
 
       renderer.render(scene, camera);
-    };
+    }
 
     animate();
+
+    // === THREE.JS EXAMPLE CODE END ===
   }
+
   render() {
     return <div ref={(ref) => (this.mount = ref)} />;
   }
 }
 
-const rootElement = document.getElementById("root");
-ReactDOM.render(<App />, rootElement);
+export default App;
+
+ReactDOM.render(<App />, document.getElementById("root"));
