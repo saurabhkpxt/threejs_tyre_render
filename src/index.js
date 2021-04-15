@@ -73,3 +73,9 @@ class App extends Component {
 export default App;
 
 ReactDOM.render(<App />, document.getElementById("root"));
+
+//To convert STP to STL https://anyconv.com/stp-to-stl-converter/
+
+//To convert STL to GTLF https://dualbox.com/apps/stl-to-gltf-glb/production
+
+//To view 3D model online https://3dviewer.net/
